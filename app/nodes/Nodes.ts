@@ -14,6 +14,7 @@ import OrNode from "./BooleanNodes/OrNode";
 import XorNode from "./BooleanNodes/XorNode";
 import NotNode from "./BooleanNodes/NotNode";
 import GateNode from "./ControlNodes/GateNode";
+import CurrentTimeNode from "./SensorNodes/currentTimeNode";
 
 type NodeConfig = {
   type: string;
@@ -30,6 +31,7 @@ export const nodeTypes = {
   tableNode: TableNode,
   chartNode: ChartNode,
   randomNode: RandomNode,
+  currentTimeNode: CurrentTimeNode,
   intervalNode: IntervalNode,
   valueUpdatedNode: ValueUpdatedNode,
   valueChangedNode: ValueChangedNode,
@@ -57,7 +59,7 @@ export const NODE_DATA: NodeConfig[] = [
     type: "serialReadNode",
     label: "Serial Read Node",
     className: "serialReadNode",
-    groupID: "Serial",
+    groupID: "Sensor",
     outlineColor: "#E04C74",
     initialData: {
       baudRate: 9600,
@@ -160,5 +162,12 @@ export const NODE_DATA: NodeConfig[] = [
     className: "gateNode",
     groupID: "Control",
     outlineColor: "#bed43a"
-  }
+  },
+  {
+    type: "currentTimeNode",
+    label: "Current Time Node In ms",
+    className: "currentTimeNode",
+    groupID: "Sensor",
+    outlineColor: "#4CAF50"
+  },
 ];

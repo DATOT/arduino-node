@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import React, { createContext, useContext, useState, useRef } from "react";
 
 type SerialContextType = {
@@ -23,7 +24,7 @@ interface ParsedPackage {
   key: string;
   value: string;
   time?: number | null;
-};
+}
 
 export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [port, setPort] = useState<SerialPort | null>(null);
@@ -38,9 +39,8 @@ export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
 
-  const parsePackage = (input: string) => {
+  const parsePackage = (input: string): ParsedPackage | null => {
     const PREFIX = "__ARDUINO_NODE_PKG__:";
-
     if (!input.startsWith(PREFIX)) return null;
 
     const payload = input.slice(PREFIX.length);
@@ -50,18 +50,15 @@ export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const [, timeStr, key, value] = match;
 
-    const parsed = {
+    return {
       key,
       value,
       time: Number(timeStr),
     };
-
-    console.log("[parse] ✅", parsed);
-    return parsed;
   };
 
   const connect = async () => {
-    console.log("[serial] 🔌 connect()");
+    //console.log("[serial] connect()");
 
     if (!("serial" in navigator)) {
       alert("Web Serial not supported");
@@ -86,63 +83,51 @@ export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       let buffer = "";
 
-      console.log("[serial] 🚀 read loop start");
+      //console.log("[serial] read loop start");
 
       (async () => {
         try {
           while (readLoopActive.current) {
             const { value, done } = await reader.read();
-
             if (done) break;
+            if (!value) continue;
 
-            if (value) {
-              const decoded = decoder.decode(value, { stream: true });
+            const decoded = decoder.decode(value, { stream: true });
 
-              console.log("[serial] 📥 raw:", value);
-              console.log("[serial] 🔤 decoded:", decoded);
+            buffer += decoded;
 
-              buffer += decoded;
-              const MAX_LENGTH = 1000;
+            let newlineIndex;
 
-              setLatestData(prev => {
-                const next = prev + decoded;
-                return next.length > MAX_LENGTH
-                  ? next.slice(-MAX_LENGTH)
-                  : next;
-              });
+            while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+              const line = buffer.slice(0, newlineIndex).trim();
+              buffer = buffer.slice(newlineIndex + 1);
 
-              const PREFIX = "__ARDUINO_NODE_PKG__:";
-              let start;
+              if (!line) continue;
 
-              while ((start = buffer.indexOf(PREFIX)) !== -1) {
-                const end = buffer.indexOf("}", start);
+              //console.log("[serial] 📩 line:", line);
 
-                if (end === -1) break;
+              // FULL LINE ONLY
+              setLatestData(line);
 
-                const packet = buffer.slice(start, end + 1);
-                console.log("[serial] 📦 packet:", packet);
-
-                const parsed = parsePackage(packet);
-                if (parsed) {
-                  setLatestDataParsed(parsed);
-                }
-
-                buffer = buffer.slice(end + 1);
+              // optional structured parsing
+              const parsed = parsePackage(line);
+              if (parsed) {
+                setLatestDataParsed(parsed);
               }
             }
           }
         } catch (err) {
-          console.error("[serial] ❌ read error:", err);
+          console.error("[serial] read error:", err);
         }
       })();
 
     } catch (err) {
-      console.error("[serial] ❌ connect error:", err);
+      console.error("[serial] connect error:", err);
     }
   };
 
   const disconnect = async () => {
-    console.log("[serial] 🔌 disconnect()");
+    console.log("[serial] disconnect()");
 
     if (!port) return;
 
@@ -159,7 +144,7 @@ export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       await port.close();
     } catch (err) {
-      console.error("[serial] ❌ disconnect error:", err);
+      console.error("[serial] disconnect error:", err);
     } finally {
       setPort(null);
       setIsConnected(false);
@@ -167,15 +152,13 @@ export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const send = async (data: string) => {
-    console.log("[serial] 📤 send:", data);
-
-    if (!writerRef.current) return;
+    console.log("[serial] send:", data);
 
     try {
-      const encoded = encoder.encode(data);
-      await writerRef.current.write(encoded);
+      if (!writerRef.current) return;
+      await writerRef.current.write(encoder.encode(data));
     } catch (err) {
-      console.error("[serial] ❌ send error:", err);
+      console.error("[serial] send error:", err);
     }
   };
 
@@ -188,12 +171,10 @@ export const SerialProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         send,
         latestData,
         latestDataParsed,
-        isConnected
+        isConnected,
       }}
     >
       {children}
     </SerialContext.Provider>
   );
 };
-
-

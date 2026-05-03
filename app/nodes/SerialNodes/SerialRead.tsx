@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import { Position, useReactFlow } from "@xyflow/react";
 import React, { useEffect, useRef } from "react";
 import {
@@ -10,72 +11,72 @@ import {
 } from "@/app/components/base-node";
 import ValueHandle from "@/app/handles/ValueHandle/ValueHandle";
 import { useSerial } from "@/app/context/Serial/SerialContext";
+import { NumberData } from "@/app/types/data";
+import { sign } from "crypto";
 
+interface SerialReadNodeData {
+  baudRate?: number;
+  key?: string;
+}
 type SerialReadNodeProps = {
   id: string;
-  data: {
-    baudRate?: number;
-    key?: string;
-    value?: number | null;
-    time?: number | null;
-  };
-};
-
-const PREFIX = "__ARDUINO_NODE_PKG__:";
-
-const parsePackage = (input: string) => {
-  if (!input.startsWith(PREFIX)) return null;
-
-  const payload = input.slice(PREFIX.length);
-  const match = payload.match(/^\{\[(\d+)\];\("([^"]+)":"([^"]+)"\)\}$/);
-  if (!match) return null;
-
-  const [, timeStr, key, valueStr] = match;
-
-  const valueNum = Number(valueStr);
-  if (Number.isNaN(valueNum)) return null;
-
-  return {
-    key,
-    value: valueNum,
-    time: Number(timeStr),
-  };
-};
+  data: SerialReadNodeData & NumberData;
+}
 
 const SerialReadNode = ({ id, data }: SerialReadNodeProps) => {
   const { updateNodeData } = useReactFlow();
-  const { latestData } = useSerial();
+  const { latestDataParsed, latestData } = useSerial();
 
-  const bufferRef = useRef("");
-  const lastPackageRef = useRef<string | null>(null);
-
-  const baudRate = data.baudRate ?? 9600;
   const keyFilter = data.key ?? "";
+  const lastSignatureRef = useRef<string | null>(null);
 
   useEffect(() => {
+    console.log(latestData)
     if (!latestData) return;
 
-    bufferRef.current += latestData;
-
-    const parts = bufferRef.current.split("\n");
-    bufferRef.current = parts.pop() || "";
-
-    for (const part of parts) {
-      const parsed = parsePackage(part.trim());
-      if (!parsed) continue;
-
-      if (keyFilter && parsed.key !== keyFilter) continue;
-
-      const signature = `${parsed.key}-${parsed.time}-${parsed.value}`;
-      if (lastPackageRef.current === signature) continue;
-
-      lastPackageRef.current = signature;
-
-      updateNodeData(id, {
-        value: parsed.value,
-        time: parsed.time,
-      });
+    interface ParsedPackage {
+      key: string;
+      value: number;
+      time: number;
     }
+
+    const PREFIX = "__ARDUINO_NODE_PKG__:";
+
+    const parsePackage = (input: string): ParsedPackage | null => {
+      if (!input.startsWith(PREFIX)) return null;
+
+      const payload = input.slice(PREFIX.length);
+
+      const match = payload.match(
+        /^\{\[(\d+)\];\("key":"([^"]+)","value":(\d+)\)\}$/
+      );
+
+      if (!match) return null;
+
+      const [, timeStr, key, valueStr] = match;
+
+      return {
+        key,
+        value: Number(valueStr),
+        time: Number(timeStr),
+      };
+    };
+    const parsed = parsePackage(latestData);
+    console.log(parsed)
+    if (!parsed) return;
+
+    //  filter by key
+    if (keyFilter && parsed.key !== keyFilter) return;
+
+    //  dedupe updates
+    const signature = `${parsed.key}-${parsed.time}`;
+    if (lastSignatureRef.current === signature) return;
+    lastSignatureRef.current = signature;
+
+    //  update node data (ONLY latest value)
+    updateNodeData(id, {
+      numberValue: parsed.value,
+    });
   }, [latestData, keyFilter, id, updateNodeData]);
 
   return (
@@ -85,12 +86,12 @@ const SerialReadNode = ({ id, data }: SerialReadNodeProps) => {
       </BaseNodeHeader>
 
       <BaseNodeContent className="flex flex-col gap-3 p-4">
-        {/* Baud Rate */}
+        {/* Baud Rate (UI only) */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">Baud:</label>
           <input
             type="number"
-            value={baudRate}
+            value={data.baudRate ?? 9600}
             onChange={(e) =>
               updateNodeData(id, { baudRate: Number(e.target.value) })
             }
@@ -112,15 +113,11 @@ const SerialReadNode = ({ id, data }: SerialReadNodeProps) => {
           />
         </div>
 
-        {/* Output Display */}
+        {/* Output */}
         <div className="flex flex-col gap-1 pt-2 border-t text-sm">
           <div>
             <span className="font-medium">Value: </span>
-            {data.value ?? "--"}
-          </div>
-          <div>
-            <span className="font-medium">Time: </span>
-            {data.time ?? "--"}
+            {data.numberValue ?? "--"}
           </div>
         </div>
       </BaseNodeContent>
@@ -130,14 +127,6 @@ const SerialReadNode = ({ id, data }: SerialReadNodeProps) => {
           type="source"
           position={Position.Right}
           title="value"
-          kinds={["number"]}
-          multiplicity="multi"
-        />
-
-        <ValueHandle
-          type="source"
-          position={Position.Right}
-          title="time"
           kinds={["number"]}
           multiplicity="multi"
         />

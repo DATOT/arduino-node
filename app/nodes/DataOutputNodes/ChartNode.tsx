@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import {
   Position,
   useNodeConnections,
@@ -10,6 +11,7 @@ import {
 } from "@xyflow/react";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import {
   BaseNode,
   BaseNodeContent,
@@ -33,16 +35,23 @@ import {
 
 const MAX_POINTS = 50;
 
-const ChartNode = ({ id }: { id: string }) => {
+interface ChartNodeProps {
+  id: string;
+  data: {
+    size: {
+      width: number,
+      height: number
+    }
+  }
+};
+const ChartNode = ({ id, data: thisNodeData }: ChartNodeProps) => {
   const { registerNode, unregisterNode } = useFlowRuntime();
   const { setNodes, getNode } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
   const edges = useEdges();
 
-  const node = getNode(id);
-
   const [size, setSize] = useState(
-    node?.data?.size ?? { width: 400, height: 300 }
+    thisNodeData?.size ?? { width: 250, height: 300 }
   );
 
   const updateNodeData = (newData: any) => {
@@ -57,7 +66,7 @@ const ChartNode = ({ id }: { id: string }) => {
 
   const [data, setData] = useState<{ x: number; y: number }[]>([]);
 
-  // handles
+  // Handles
   const X_HANDLE = encodeHandle({
     types: ["number"],
     multiplicity: "single",
@@ -106,16 +115,15 @@ const ChartNode = ({ id }: { id: string }) => {
     return map;
   }, [sourceIds, nodesData]);
 
-  // refs (no race condition)
   const xRef = useRef<number | null>(null);
   const yRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (!sourceMap.x || !sourceMap.y) return;
     xRef.current = idToNode.get(sourceMap.x)?.data?.numberValue ?? null;
     yRef.current = idToNode.get(sourceMap.y)?.data?.numberValue ?? null;
   }, [idToNode, sourceMap]);
 
-  // 🔥 signal handler
   const handler = useCallback(
     (handle: string) => {
       if (handle !== SIGNAL) return;
@@ -127,9 +135,7 @@ const ChartNode = ({ id }: { id: string }) => {
 
       setData((prev) => {
         const next = [...prev, { x, y }];
-        return next.length > MAX_POINTS
-          ? next.slice(-MAX_POINTS)
-          : next;
+        return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
       });
     },
     [SIGNAL]
@@ -140,17 +146,15 @@ const ChartNode = ({ id }: { id: string }) => {
     return () => unregisterNode(id);
   }, [id, handler, registerNode, unregisterNode]);
 
-  // 🔥 important: force handle updates like GraphNode
   useEffect(() => {
     updateNodeInternals(id);
   }, [edges, id, updateNodeInternals]);
 
   return (
     <>
-      {/* Resize control (same as GraphNode) */}
       <NodeResizeControl
         minWidth={250}
-        minHeight={200}
+        minHeight={300}
         onResize={(_, params) => {
           const newSize = { width: params.width, height: params.height };
           setSize(newSize);
@@ -158,13 +162,19 @@ const ChartNode = ({ id }: { id: string }) => {
         }}
       />
 
-      <BaseNode className="w-full h-full">
+      <BaseNode
+        style={{
+          width: size.width,
+          height: size.height,
+        }}
+        className="min-w-[250px] min-h-[300px]"
+      >
         <BaseNodeHeader>
           <BaseNodeHeaderTitle>Chart</BaseNodeHeaderTitle>
         </BaseNodeHeader>
 
         <BaseNodeContent className="p-2 w-full h-full flex flex-col">
-          <div className="flex-1 w-full h-full">
+          <div className="w-full h-full min-h-0">
             {data.length === 0 ? (
               <div className="text-center text-gray-400 h-full flex items-center justify-center text-xs">
                 No data yet…

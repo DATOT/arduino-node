@@ -1,81 +1,64 @@
 'use client'
 
-import { useState } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid
-} from "recharts";
+import Link from 'next/link'
 
-export default function Home() {
-  const [data, setData] = useState([]);
-
-  const WINDOW = 10000; // 10 seconds window
-
-  const addPoint = () => {
-    const now = Date.now();
-
-    const newPoint = {
-      time: now,
-      value: Math.floor(Math.random() * 100),
-    };
-
-    setData(prev => {
-      const updated = [...prev, newPoint];
-
-      // keep only last 10 seconds
-      return updated.filter(d => now - d.time <= WINDOW);
-    });
-  };
-
+/* ─── Title ─── */
+function Title() {
   return (
-    <div className="w-full h-screen flex flex-col items-center p-4 gap-4 bg-white">
+    <h1
+      style={{
+        fontFamily: "'Share Tech Mono', monospace",
+        fontSize: 'clamp(2.5rem, 6vw, 5rem)',
+        color: '#111',
+        letterSpacing: '0.15em',
+        textAlign: 'center',
+      }}
+    >
+      ARDUINO NODE
+    </h1>
+  )
+}
 
+/* ─── Button ─── */
+function LaunchButton() {
+  return (
+    <Link href="/serial">
       <button
-        onClick={addPoint}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
+        style={{
+          marginTop: 40,
+          padding: '14px 28px',
+          fontFamily: "'Share Tech Mono', monospace",
+          background: '#111',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 6,
+          cursor: 'pointer',
+          letterSpacing: '0.2em',
+          fontWeight: 'bold',
+        }}
       >
-        Add Data Point
+        LAUNCH INTERFACE
       </button>
+    </Link>
+  )
+}
 
-      <LineChart
-        width={800}
-        height={400}
-        data={data}
-      >
-        <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-
-        <XAxis
-          dataKey="time"
-          type="number"
-          domain={['dataMin', 'dataMax']}
-          tickFormatter={(t) =>
-            new Date(t).toLocaleTimeString([], {
-              minute: '2-digit',
-              second: '2-digit'
-            })
-          }
-        />
-
-        <YAxis />
-
-        <Tooltip
-          labelFormatter={(t) =>
-            new Date(t).toLocaleTimeString()
-          }
-        />
-
-        <Line
-          dataKey="value"
-          stroke="#2563eb"
-          dot={false}
-          isAnimationActive={false}
-          animationDuration={300}
-        />
-      </LineChart>
-    </div>
-  );
+/* ─── Page ─── */
+export default function Home() {
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#f5f5f5',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+      }}
+    >
+      <Title />
+      <LaunchButton />
+    </main>
+  )
 }
