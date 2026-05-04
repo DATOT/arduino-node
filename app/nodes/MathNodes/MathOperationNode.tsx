@@ -123,7 +123,7 @@ const MathOperationNode = ({ id, data }: OperationNodeProps) => {
           {/* Dropdown */}
           <Select.Portal>
             <Select.Content
-              className="bg-white border rounded shadow-md z-50 min-w-[80px]"
+              className="bg-white border rounded shadow-md z-50"
               position="popper"
             >
               {/* This is REQUIRED for proper scrolling in Radix */}

@@ -19,7 +19,7 @@ function Title() {
   )
 }
 
-/* ─── Button ─── */
+/* ─── Launch Button ─── */
 function LaunchButton() {
   return (
     <Link href="/serial">
@@ -43,6 +43,29 @@ function LaunchButton() {
   )
 }
 
+/* ─── Download Button ─── */
+function DownloadButton() {
+  return (
+    <a href="/arduino_node.h" download style={{ marginTop: 16 }}>
+      <button
+        style={{
+          padding: '14px 28px',
+          fontFamily: "'Share Tech Mono', monospace",
+          background: '#444',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 6,
+          cursor: 'pointer',
+          letterSpacing: '0.2em',
+          fontWeight: 'bold',
+        }}
+      >
+        DOWNLOAD LIBRARY
+      </button>
+    </a>
+  )
+}
+
 /* ─── Page ─── */
 export default function Home() {
   return (
@@ -59,6 +82,7 @@ export default function Home() {
     >
       <Title />
       <LaunchButton />
+      <DownloadButton />
     </main>
   )
 }
