@@ -14,7 +14,12 @@ import OrNode from "./BooleanNodes/OrNode";
 import XorNode from "./BooleanNodes/XorNode";
 import NotNode from "./BooleanNodes/NotNode";
 import GateNode from "./ControlNodes/GateNode";
-import CurrentTimeNode from "./SensorNodes/currentTimeNode";
+import CurrentTimeNode from "./SensorNodes/CurrentTimeNode";
+import StartedNode from "./SignalNodes/StartedNode";
+import TrueNode from "./BooleanNodes/TrueNode";
+import FalseNode from "./BooleanNodes/FalseNode";
+import ButtonSignalNode from "./SignalNodes/ButtonSignalNode";
+import LightNode from "./DataOutputNodes/LightNode";
 
 type NodeConfig = {
   type: string;
@@ -30,11 +35,14 @@ export const nodeTypes = {
   serialReadNode: SerialReadNode,
   tableNode: TableNode,
   chartNode: ChartNode,
+  lightNode: LightNode,
   randomNode: RandomNode,
   currentTimeNode: CurrentTimeNode,
   intervalNode: IntervalNode,
   valueUpdatedNode: ValueUpdatedNode,
   valueChangedNode: ValueChangedNode,
+  buttonSignalNode: ButtonSignalNode,
+  startedNode: StartedNode,
   mathOperationNode: OperationNode,
   cmpOperationNode: CmpOperationNode,
   ifNode: IfNode,
@@ -43,6 +51,8 @@ export const nodeTypes = {
   orNode: OrNode,
   xorNode: XorNode,
   notNode: NotNode,
+  trueNode: TrueNode,
+  falseNode: FalseNode
 };
 
 export const NODE_DATA: NodeConfig[] = [
@@ -108,9 +118,30 @@ export const NODE_DATA: NodeConfig[] = [
     outlineColor: "#A4EBD1"
   },
   {
+    type: "startedNode",
+    label: "Started Node",
+    className: "startedNode",
+    groupID: "Signal",
+    outlineColor: "#A4EBD1"
+  },
+  {
+    type: "buttonSignalNode",
+    label: "Button Signal Node",
+    className: "buttonSignalNode",
+    groupID: "Signal",
+    outlineColor: "#A4EBD1"
+  },
+  {
     type: "chartNode",
     label: "Chart Node",
     className: "chartNode",
+    groupID: "Output Display",
+    outlineColor: "#E4A2C2",
+  },
+  {
+    type: "lightNode",
+    label: "Light Node",
+    className: "lightNode",
     groupID: "Output Display",
     outlineColor: "#E4A2C2",
   },
@@ -146,6 +177,20 @@ export const NODE_DATA: NodeConfig[] = [
     type: "notNode",
     label: "Not Node",
     className: "notNode",
+    groupID: "Boolean",
+    outlineColor: "#bed43a"
+  },
+  {
+    type: "trueNode",
+    label: "True Node",
+    className: "trueNode",
+    groupID: "Boolean",
+    outlineColor: "#bed43a"
+  },
+  {
+    type: "falseNode",
+    label: "False Node",
+    className: "falseNode",
     groupID: "Boolean",
     outlineColor: "#bed43a"
   },

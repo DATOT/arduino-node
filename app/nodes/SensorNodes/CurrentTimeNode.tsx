@@ -60,12 +60,12 @@ const CurrentTimeNode = ({ id }: DateNowNodeProps) => {
   return (
     <BaseNode>
       <BaseNodeHeader>
-        <BaseNodeHeaderTitle>Current Time in ms</BaseNodeHeaderTitle>
+        <BaseNodeHeaderTitle>Current time in ms</BaseNodeHeaderTitle>
       </BaseNodeHeader>
 
       <BaseNodeContent>
         <div className="text-xs text-gray-400">
-          Live timestamp (ms)
+          Time since Jan 1st 1970 UTC (ms)
         </div>
 
         {current !== null && (

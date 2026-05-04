@@ -11,14 +11,15 @@ import {
 
 import { useFlowRuntime } from "@/app/context/Runtime/FlowRuntimeContext";
 import ValueHandle from "@/app/handles/ValueHandle/ValueHandle";
+import { encodeHandle } from "@/app/lib/utils";
 
 const StartedNode = ({ id }: { id: string }) => {
   const runtime = useFlowRuntime();
 
   useEffect(() => {
-    // subscribe to runtime start
     const unsubscribe = runtime.onStart(() => {
-      runtime.emit(id, "out");
+      console.log("started")
+      runtime.emit(id, encodeHandle({ types: ["signal"], multiplicity: "multi" }), true);
     });
 
     return unsubscribe;

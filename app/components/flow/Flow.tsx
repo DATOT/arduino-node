@@ -55,7 +55,7 @@ function Flow() {
       >
         <Controls />
         <Background />
-        {<DevTools position="top-left" />}
+        {/*<DevTools position="top-left" />*/}
         <MiniMap />
       </ReactFlow>
     </div>

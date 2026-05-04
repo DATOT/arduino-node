@@ -44,7 +44,9 @@ export const FlowRuntimeProvider = ({ children }: { children: React.ReactNode })
   // --------------------------
   const onStart = useCallback((cb: () => void) => {
     startListenersRef.current.add(cb);
-
+    if (runningRef.current) {
+      cb();
+    }
     return () => startListenersRef.current.delete(cb);
   }, []);
 

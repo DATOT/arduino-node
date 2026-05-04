@@ -21,6 +21,7 @@ const OPERATIONS = {
   "-": { argc: 2, func: (...args: number[]) => args[0] - args[1] },
   "*": { argc: 2, func: (...args: number[]) => args[0] * args[1] },
   "/": { argc: 2, func: (...args: number[]) => args[0] / args[1] },
+  "//": { argc: 2, func: (...args: number[]) => Math.floor(args[0] / args[1]) },
   "%": { argc: 2, func: (...args: number[]) => args[0] % args[1] },
   "^": { argc: 2, func: (...args: number[]) => Math.pow(args[0], args[1]) },
 
@@ -111,25 +112,35 @@ const MathOperationNode = ({ id, data }: OperationNodeProps) => {
             })
           }
         >
-          <Select.Trigger className="border rounded px-2 py-1.5 flex items-center justify-between text-sm">
+          {/* Trigger */}
+          <Select.Trigger className="border rounded px-1.5 py-1 flex items-center justify-between text-xs h-7">
             {opKey}
             <Select.Icon>
-              <ChevronDownIcon className="w-4 h-4" />
+              <ChevronDownIcon className="w-3 h-3" />
             </Select.Icon>
           </Select.Trigger>
 
-          <Select.Content className="bg-white border rounded shadow-md z-50">
-            {Object.keys(OPERATIONS).map((key) => (
-              <Select.Item
-                key={key}
-                value={key}
-                className="p-2 flex items-center justify-between cursor-pointer hover:bg-gray-100"
-              >
-                {key}
-                {key === opKey && <CheckIcon className="w-4 h-4" />}
-              </Select.Item>
-            ))}
-          </Select.Content>
+          {/* Dropdown */}
+          <Select.Portal>
+            <Select.Content
+              className="bg-white border rounded shadow-md z-50 min-w-[80px]"
+              position="popper"
+            >
+              {/* This is REQUIRED for proper scrolling in Radix */}
+              <Select.Viewport className="max-h-40 overflow-y-auto p-1">
+                {Object.keys(OPERATIONS).map((key) => (
+                  <Select.Item
+                    key={key}
+                    value={key}
+                    className="px-2 py-1 text-xs flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded"
+                  >
+                    <Select.ItemText>{key}</Select.ItemText>
+                    {key === opKey && <CheckIcon className="w-3 h-3" />}
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
         </Select.Root>
 
         {/* Display result */}
@@ -162,7 +173,7 @@ const MathOperationNode = ({ id, data }: OperationNodeProps) => {
           multiplicity="multi"
         />
       </BaseNodeHandles>
-    </BaseNode>
+    </BaseNode >
   );
 };
 

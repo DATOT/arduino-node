@@ -107,6 +107,7 @@ const CmpOperationNode = ({ id, data }: CmpNodeProps) => {
             updateNodeData(id, { op: val as OpKey })
           }
         >
+          {/* Trigger */}
           <Select.Trigger className="border rounded px-2 py-1.5 flex items-center justify-between text-sm">
             {opKey}
             <Select.Icon>
@@ -114,18 +115,27 @@ const CmpOperationNode = ({ id, data }: CmpNodeProps) => {
             </Select.Icon>
           </Select.Trigger>
 
-          <Select.Content className="bg-white border rounded shadow-md z-50">
-            {Object.keys(OPERATIONS).map((key) => (
-              <Select.Item
-                key={key}
-                value={key}
-                className="p-2 flex items-center justify-between cursor-pointer hover:bg-gray-100"
-              >
-                {key}
-                {key === opKey && <CheckIcon className="w-4 h-4" />}
-              </Select.Item>
-            ))}
-          </Select.Content>
+          {/* Dropdown */}
+          <Select.Portal>
+            <Select.Content
+              className="bg-white border rounded shadow-md z-50 min-w-[100px]"
+              position="popper"
+            >
+              {/* Scroll container */}
+              <Select.Viewport className="max-h-40 overflow-y-auto p-1">
+                {Object.keys(OPERATIONS).map((key) => (
+                  <Select.Item
+                    key={key}
+                    value={key}
+                    className="p-2 text-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded"
+                  >
+                    <Select.ItemText>{key}</Select.ItemText>
+                    {key === opKey && <CheckIcon className="w-4 h-4" />}
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
         </Select.Root>
 
         {/* Display */}

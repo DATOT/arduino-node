@@ -1,6 +1,6 @@
 'use client'
-import { Position } from "@xyflow/react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Position, useNodesData, useReactFlow } from "@xyflow/react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   BaseNode,
   BaseNodeContent,
@@ -14,8 +14,11 @@ import { encodeHandle } from "@/app/lib/utils";
 
 const IntervalNode = ({ id }: { id: string }) => {
   const { emit } = useFlowRuntime();
+  const { updateNodeData } = useReactFlow();
 
-  const [intervalSec, setIntervalSec] = useState(1);
+  const node = useNodesData(id);
+  const intervalSec: number = (node?.data?.intervalSec ?? 1) as number;
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const tick = useCallback(() => {
@@ -45,6 +48,7 @@ const IntervalNode = ({ id }: { id: string }) => {
       <BaseNodeContent>
         <div className="flex items-center gap-2">
           <span>Every</span>
+
           <input
             type="number"
             min={0.1}
@@ -53,11 +57,12 @@ const IntervalNode = ({ id }: { id: string }) => {
             onChange={(e) => {
               const val = Number(e.target.value);
               if (!isNaN(val) && val > 0) {
-                setIntervalSec(val);
+                updateNodeData(id, { intervalSec: val });
               }
             }}
             className="w-16 px-1 py-0.5 border rounded text-sm"
           />
+
           <span>s</span>
         </div>
       </BaseNodeContent>

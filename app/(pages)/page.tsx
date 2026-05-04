@@ -37,7 +37,7 @@ function LaunchButton() {
           fontWeight: 'bold',
         }}
       >
-        LAUNCH INTERFACE
+        RUN SERIAL FLOW
       </button>
     </Link>
   )
